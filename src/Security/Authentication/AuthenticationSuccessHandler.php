@@ -30,7 +30,7 @@ class AuthenticationSuccessHandler implements AuthenticationSuccessHandlerInterf
 
         if ($activate === false) {
 
-            return new JsonResponse('E-Mail non vérifié', Response::HTTP_FORBIDDEN);
+            return new JsonResponse('Compte non activé. Regardez vos mails', Response::HTTP_FORBIDDEN);
         }
 
         return $this->baseHandler->onAuthenticationSuccess($request, $token);
