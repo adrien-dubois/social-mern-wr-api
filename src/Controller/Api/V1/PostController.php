@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -125,5 +126,78 @@ class PostController extends AbstractController
         return $this->json($post, 201, [], [
             'groups' => 'post'
         ]);
+    }
+
+    /**
+     * Update an article by its ID only if it's the creator
+     *
+     * @Route("/{id}", name="update", methods={"PUT","PATCH"})
+     *
+     * @param Post $post
+     * @param Request $request
+     * @param SerializerInterface $serializer
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
+    public function update(
+        Post $post,
+        Request $request,
+        SerializerInterface $serializer,
+        EntityManagerInterface $em
+    ): JsonResponse
+    {
+        // This method will allows to access to the update method, with the voter logic
+        $this->denyAccessUnlessGranted('edit', $post, "Seul l'auteur de ce post peut le modifier.");
+
+        $jsonData = $request->getContent();
+
+        if(!$post){
+            return $this->json([
+                'errors' => ['message'=>'Ce post n\'existe pas']
+            ], 404
+            );
+        }
+
+        $serializer->deserialize($jsonData, Post::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE=>$post]);
+
+        $dataPicture = json_decode($request->getContent(), true);
+        if(isset($dataPicture['image']['base64'])){
+            $imageFile = $dataPicture['image']['base64'];
+            $post->setPicture($imageFile);
+        }
+
+        $em->flush();
+
+        return $this->json(["message" => "Le post a bien été modifié"], 200, [], [
+            'groups' => 'post'
+        ]);
+    }
+
+    /**
+     * Remove an article by its ID only by its author
+     *
+     * @Route("/{id}", name="delete", methods={"DELETE"})
+     *
+     * @param Post $post
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
+    public function delete(Post $post, EntityManagerInterface $em): JsonResponse
+    {
+        // This protection will check by the voter if we are allowed to delete this article
+        $this->denyAccessUnlessGranted('delete', $post, "Seul l'auteur de ce post peut le supprimer.");
+
+        if(!$post){
+            return $this->json([
+                'error' => 'Ce post n\'existe pas.'
+            ], 404);
+        }
+
+        $em->remove($post);
+        $em->flush();
+
+        return $this->json([
+            'message' => 'L\'article a bien été supprimé'
+        ], 200);
     }
 }
