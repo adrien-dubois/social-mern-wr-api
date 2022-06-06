@@ -1,0 +1,9 @@
+<h1>Code d'activation de votre compte sur White Rabbit's Social Net</h1>
+
+<p>Bonjour, {{user.pseudo}} </p>
+<br>
+<p>Vous venez de vous enregistrer sur <b>White Rabbit</b>, votre identifiant de connexion sera l'adresse email que vous venez de renseigner </p>
+<br>
+<p>Votre code d'activation est le : <code>{{user.otp}}</code> </p>
+<br>
+<p>Afin d'activer votre compte, veuillez cliquer sur ce lien : <a href="{{absolute_url(path('register_activation', {'activationToken': user.activationToken}))}}">veuillez cliquer sur ce lien</a> </p>

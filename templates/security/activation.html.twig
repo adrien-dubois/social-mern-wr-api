@@ -1,0 +1,27 @@
+{% extends "base.html.twig" %}
+
+{% block title %}
+    Activation - {{parent()}}
+{% endblock %}
+
+{% block body %}
+    <div class="activate">
+        <div class="logo">
+            <img src="{{asset('img/logo.png')}} " alt="">
+        </div>
+        <div class="form">
+            {{form_start(formView, {'attr': {'class': 'otp-form'}})}}
+            <h2>Entrez votre code de validation</h2>
+            <div class="input-div">
+                <div class="icon">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                {{ form_widget(formView.otp) }}
+            </div>
+            {{ form_row(formView.submit) }}
+
+            {{form_end(formView)}}
+
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,9 @@
+framework:
+    mailer:
+        dsn: '%env(MAILER_DSN)%'
+
+        envelope:
+            sender: 'admin@white-umbrella.fr'
+
+        headers:
+            From: 'White Rabbit Social Net <admin@white-umbrella.fr>'
