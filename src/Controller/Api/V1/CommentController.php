@@ -86,7 +86,7 @@ class CommentController extends AbstractController
         $jsonData = $request->getContent();
 
         /** @var Comment $comment */
-        $comment = $serializer->deserialize($jsonData, Comment::class, 'json');
+        $comment = $serializer->deserialize($jsonData, Comment::class, 'json', [AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER]);
 
         $errors = $validator->validate($comment);
 
@@ -100,7 +100,7 @@ class CommentController extends AbstractController
         $em->persist($comment);
         $em->flush();
 
-        return $this->json($comments, 201, [], [
+        return $this->json($comment, 201, [], [
             'groups' =>'comment'
         ]);
     }
@@ -135,7 +135,7 @@ class CommentController extends AbstractController
             );
         }
 
-        $serializer->deserialize($jsonData, Post::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE=>$comment]);
+        $serializer->deserialize($jsonData, Comment::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE=>$comment]);
 
 
         $em->flush();

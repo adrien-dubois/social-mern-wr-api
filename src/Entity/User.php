@@ -19,17 +19,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"post", "comment"})
+     * @Groups({"post", "comment", "user"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
+     * @Groups({"user"})
      */
     private $email;
 
     /**
      * @ORM\Column(type="json")
+     * @Groups({"user"})
      */
     private $roles = [];
 
@@ -41,7 +43,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"post", "comment"})
+     * @Groups({"post", "comment", "user", "follow"})
      */
     private $pseudo;
 
@@ -52,11 +54,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\Column(type="text", nullable=true)
+     * @Groups({"user"})
      */
     private $bio;
 
     /**
      * @ORM\Column(type="datetime_immutable")
+     * @Groups({"user"})
      */
     private $createdAt;
 
@@ -67,16 +71,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\ManyToMany(targetEntity=User::class, inversedBy="following")
+     * @Groups({"follow"})
      */
     private $follower;
 
     /**
      * @ORM\ManyToMany(targetEntity=User::class, mappedBy="follower")
+     * @Groups({"follow"})
      */
     private $following;
 
     /**
      * @ORM\OneToMany(targetEntity=Post::class, mappedBy="author")
+     * @Groups({"user"})
      */
     private $posts;
 
@@ -87,6 +94,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\OneToMany(targetEntity=Comment::class, mappedBy="commenter")
+     * @Groups({"user"})
      */
     private $comments;
 
@@ -97,6 +105,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\Column(type="boolean")
+     * @Groups({"user"})
      */
     private $isActive;
 
