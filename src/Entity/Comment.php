@@ -15,38 +15,39 @@ class Comment
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"post"})
+     * @Groups({"post", "comment"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="text")
-     * @Groups({"post"})
+     * @Groups({"post", "comment"})
      */
     private $text;
 
     /**
      * @ORM\Column(type="datetime_immutable")
-     * @Groups({"post"})
+     * @Groups({"post", "comment"})
      */
     private $createdAt;
 
     /**
      * @ORM\Column(type="datetime_immutable", nullable=true)
-     * @Groups({"post"})
+     * @Groups({"post", "comment"})
      */
     private $updatedAt;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="comments")
      * @ORM\JoinColumn(nullable=false)
-     * @Groups({"post"})
+     * @Groups({"post", "comment"})
      */
     private $commenter;
 
     /**
      * @ORM\ManyToOne(targetEntity=Post::class, inversedBy="comments")
      * @ORM\JoinColumn(nullable=false)
+     * @Groups({"comment"})
      */
     private $post;
 
