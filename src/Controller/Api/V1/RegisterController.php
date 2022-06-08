@@ -102,7 +102,12 @@ class RegisterController extends AbstractController
      * @param EntityManagerInterface $em
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
-    public function activation($activationToken, UserRepository $repository, Request $request, EntityManagerInterface $em){
+    public function activation(
+        $activationToken,
+        UserRepository $repository,
+        Request $request,
+        EntityManagerInterface $em
+    ){
 
         $form = $this->createForm(OtpType::class);
         $content = $form->handleRequest($request);

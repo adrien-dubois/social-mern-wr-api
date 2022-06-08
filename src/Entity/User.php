@@ -19,7 +19,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"post", "comment", "user"})
+     * @Groups({"post", "comment", "user", "follow"})
      */
     private $id;
 
@@ -71,7 +71,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\ManyToMany(targetEntity=User::class, inversedBy="following")
-     * @Groups({"follow"})
+     *
      */
     private $follower;
 

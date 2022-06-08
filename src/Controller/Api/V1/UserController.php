@@ -34,7 +34,7 @@ class UserController extends AbstractController
         $users = $repository->findAll();
 
         return $this->json($users, 200, [], [
-        "groups" => "user",
+        "groups" => ["user"]
         ]);
     }
 
@@ -58,6 +58,24 @@ class UserController extends AbstractController
         $em->flush();
 
         return $this->json(['message' => "Follow new user"], 200, [], [
+            "groups" => "follow"
+        ]);
+    }
+
+    /**
+     * Follow list of the current user
+     *
+     * @Route("/follow/", name="follow", methods={"GET"})
+     *
+     * @param UserRepository $repository
+     * @return JsonResponse
+     */
+    public function followList(UserRepository $repository): JsonResponse
+    {
+        $currentUser = $this->security->getUser();
+        $profile = $repository->findOneBy(['email' => $currentUser->getUserIdentifier()]);
+
+        return $this->json($profile, 200, [],[
             "groups" => "follow"
         ]);
     }
