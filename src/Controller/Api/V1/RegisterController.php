@@ -67,9 +67,6 @@ class RegisterController extends AbstractController
         if(isset($dataPicture['image']['base64'])){
             $imageFile = $dataPicture['image']['base64'];
             $user->setPicture($imageFile);
-        } elseif(!isset($dataPicture['image']['base64'])){
-            $imageFile = $this->getParameter('app.defaultimg');
-            $user->setPicture($imageFile);
         }
 
         if(count($errors) > 0){
