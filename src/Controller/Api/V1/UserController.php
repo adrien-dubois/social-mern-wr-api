@@ -24,6 +24,23 @@ class UserController extends AbstractController
 
     /**
      *
+     * @Route("/{id}", name="currentUser", methods={"GET"})
+     *
+     * @param int $id
+     * @param UserRepository $repository
+     * @return JsonResponse
+     */
+    public function getCurrentUser(int $id, UserRepository $repository): JsonResponse
+    {
+        $user = $repository->find($id);
+
+        return $this->json($user, 200, [], [
+            "groups" => "user"
+        ]);
+    }
+
+    /**
+     *
      * @Route("/", name="all", methods={"GET"})
      *
      * @param UserRepository $repository
@@ -34,7 +51,7 @@ class UserController extends AbstractController
         $users = $repository->findAll();
 
         return $this->json($users, 200, [], [
-        "groups" => ["user"]
+        "groups" => "user"
         ]);
     }
 
