@@ -97,4 +97,31 @@ class UserController extends AbstractController
         ]);
     }
 
+    /**
+     *
+     * Edit user picture
+     *
+     * @Route("/picture", name="picture", methods={"PATCH"})
+     *
+     * @param UserRepository $repository
+     * @param EntityManagerInterface $em
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function changeImg(UserRepository $repository, EntityManagerInterface $em, Request $request): JsonResponse
+    {
+        $currentUser = $this->security->getUser();
+        $profile = $repository->findOneBy(['email' => $currentUser->getUserIdentifier()]);
+
+        $dataPicture = json_decode($request->getContent(), true);
+        if(isset($dataPicture['image'])){
+            $image = $dataPicture['image'];
+            $currentUser->setPicture($image);
+        }
+
+        $em->flush();
+
+        return $this->json(['Image utilisateur modifiée'], 200);
+    }
+
 }
