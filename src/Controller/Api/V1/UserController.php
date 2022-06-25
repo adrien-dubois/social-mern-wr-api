@@ -130,7 +130,7 @@ class UserController extends AbstractController
     /**
      * Remove users picture
      *
-     * @Route("/del-picture", name="del-picture", methods={"PATCH"})
+     * @Route("/del-picture", name="del-picture", methods={"POST"})
      *
      * @param UserRepository $repository
      * @param EntityManagerInterface $em
