@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api\V1;
 
+use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -9,6 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 /**
  * @Route("/api/v1/user", name="app_api_v1_user_", requirements={"id":"\d+"})
@@ -123,5 +125,38 @@ class UserController extends AbstractController
 
         return $this->json(['Image utilisateur modifiée'], 200);
     }
+
+    /**
+     * Edit current user
+     *
+     * @Route("/update", name="update_user", methods={"PUT", "PATCH"})
+     *
+     * @param UserRepository $repository
+     * @param EntityManagerInterface $em
+     * @param Request $request
+     * @param SerializerInterface $serializer
+     * @return JsonResponse
+     */
+    public function update(
+        UserRepository $repository,
+        EntityManagerInterface $em,
+        Request $request,
+        SerializerInterface $serializer
+    ): JsonResponse
+    {
+        $jsonData = $request->getContent();
+
+        $currentUser = $this->security->getUser();
+        $user = $repository->findOneBy(['email' => $currentUser->getUserIdentifier()]);
+
+        $serializer->deserialize($jsonData, User::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE=>$user]);
+
+        $em->flush();
+
+        return $this->json(["message"=> "L'utilisateur a bien été modifié"], 200, [], [
+            'groups' => 'user'
+        ]);
+    }
+
 
 }
