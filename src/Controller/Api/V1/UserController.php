@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\SerializerInterface;
 
 /**
  * @Route("/api/v1/user", name="app_api_v1_user_", requirements={"id":"\d+"})
@@ -129,7 +130,7 @@ class UserController extends AbstractController
     /**
      * Edit current user
      *
-     * @Route("/update", name="update_user", methods={"PUT", "PATCH"})
+     * @Route("/update-bio", name="update_user", methods={"PUT", "PATCH"})
      *
      * @param UserRepository $repository
      * @param EntityManagerInterface $em
@@ -137,24 +138,23 @@ class UserController extends AbstractController
      * @param SerializerInterface $serializer
      * @return JsonResponse
      */
-    public function update(
+    public function updateBio(
         UserRepository $repository,
         EntityManagerInterface $em,
-        Request $request,
-        SerializerInterface $serializer
+        Request $request
     ): JsonResponse
     {
         $jsonData = $request->getContent();
 
         $currentUser = $this->security->getUser();
         $user = $repository->findOneBy(['email' => $currentUser->getUserIdentifier()]);
+        $datas = json_decode($request->getContent(), true);
 
-        $serializer->deserialize($jsonData, User::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE=>$user]);
-
+        $user->setBio($datas);
         $em->flush();
 
-        return $this->json(["message"=> "L'utilisateur a bien été modifié"], 200, [], [
-            'groups' => 'user'
+        return $this->json($user->getBio(), 200, [], [
+            'groups' => 'bio'
         ]);
     }
 

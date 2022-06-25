@@ -62,7 +62,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\Column(type="text", nullable=true)
-     * @Groups({"user"})
+     * @Groups({"user", "bio"})
      */
     private $bio;
 
