@@ -124,7 +124,26 @@ class UserController extends AbstractController
 
         $em->flush();
 
-        return $this->json(['Image utilisateur modifiée'], 200);
+        return $this->json($image, 200);
+    }
+
+    /**
+     * Remove users picture
+     *
+     * @Route("/del-picture", name="del-picture", methods={"PATCH"})
+     *
+     * @param UserRepository $repository
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
+    public function deleteImg(UserRepository $repository, EntityManagerInterface $em): JsonResponse
+    {
+        $currentUser = $this->security->getUser();
+        $profile = $repository->findOneBy(['email' => $currentUser->getUserIdentifier()]);
+        $currentUser->setPicture(null);
+
+        $em->flush();
+        return $this->json("", 200);
     }
 
     /**
@@ -153,9 +172,7 @@ class UserController extends AbstractController
         $user->setBio($datas);
         $em->flush();
 
-        return $this->json($user->getBio(), 200, [], [
-            'groups' => 'bio'
-        ]);
+        return $this->json($datas, 200);
     }
 
 
