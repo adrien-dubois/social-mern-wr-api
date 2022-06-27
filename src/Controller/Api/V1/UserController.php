@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 
 /**
@@ -32,14 +33,29 @@ class UserController extends AbstractController
      * @param UserRepository $repository
      * @return JsonResponse
      */
-    public function getCurrentUser( UserRepository $repository): JsonResponse
+    public function getCurrentUser( UserRepository $repository, SerializerInterface $serializer): JsonResponse
     {
         $currentUser = $this->security->getUser()->getUserIdentifier();
         $user = $repository->findOneBy(array('email' => $currentUser));
 
-        return $this->json($user, 200, [], [
-            "groups" => "user"
-        ]);
+//        $result = $serializer->normalize([
+//            'code' => 200,
+//            'message' => 'ok',
+//            'user' => $user
+//        ],null,
+//            [AbstractObjectNormalizer::ENABLE_MAX_DEPTH=>true]
+//        );
+
+//        $json = $serializer->serialize(
+//            $user,
+//            'json', ['groups' => ['user','follow']]);
+
+        return $this->json($user, 200,[],
+//            ['groups' => ['user','follow']]
+            [AbstractObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($user){
+            return $user->getId();
+    }]
+        );
     }
 
     /**
@@ -62,7 +78,7 @@ class UserController extends AbstractController
     /**
      * Add a follower
      *
-     * @Route("/follow/{id}", name="follow", methods={"PATCH"})
+     * @Route("/follow/{id}", name="follow_id", methods={"PATCH"})
      *
      * @param int $id
      * @param UserRepository $repository

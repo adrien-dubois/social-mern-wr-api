@@ -10,6 +10,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -21,18 +22,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      * @Groups({"post", "comment", "user", "follow"})
+     *
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
      * @Groups({"user"})
+     *
      */
     private $email;
 
     /**
      * @ORM\Column(type="json")
      * @Groups({"user"})
+     *
      */
     private $roles = [];
 
@@ -51,18 +55,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"post", "comment", "user", "follow"})
+     *
      */
     private $pseudo;
 
     /**
      * @ORM\Column(type="text", nullable=true)
      * @Groups({"user"})
+     *
      */
     private $picture;
 
     /**
      * @ORM\Column(type="text", nullable=true)
      * @Groups({"user", "bio"})
+     *
      */
     private $bio;
 
@@ -79,6 +86,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\ManyToMany(targetEntity=User::class, inversedBy="following")
+     * @Groups({"follow"})
      *
      */
     private $follower;
@@ -86,6 +94,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @ORM\ManyToMany(targetEntity=User::class, mappedBy="follower")
      * @Groups({"follow"})
+     *
      */
     private $following;
 
@@ -114,6 +123,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @ORM\Column(type="boolean")
      * @Groups({"user"})
+     *
      */
     private $isActive;
 
