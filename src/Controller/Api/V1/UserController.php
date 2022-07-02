@@ -38,20 +38,7 @@ class UserController extends AbstractController
         $currentUser = $this->security->getUser()->getUserIdentifier();
         $user = $repository->findOneBy(array('email' => $currentUser));
 
-//        $result = $serializer->normalize([
-//            'code' => 200,
-//            'message' => 'ok',
-//            'user' => $user
-//        ],null,
-//            [AbstractObjectNormalizer::ENABLE_MAX_DEPTH=>true]
-//        );
-
-//        $json = $serializer->serialize(
-//            $user,
-//            'json', ['groups' => ['user','follow']]);
-
         return $this->json($user, 200,[],
-//            ['groups' => ['user','follow']]
             [AbstractObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($user){
             return $user->getId();
     }]
@@ -90,12 +77,43 @@ class UserController extends AbstractController
         $currentUser = $this->security->getUser();
         $follow = $repository->find($id);
         $currentUser->addFollowing($follow);
+        $user = $repository->findOneBy(array('email' => $currentUser->getUserIdentifier()));
 
         $em->flush();
 
-        return $this->json(['message' => "Follow new user"], 200, [], [
-            "groups" => "follow"
-        ]);
+        return $this->json($user, 200, [], [AbstractObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($user){
+                return $user->getId();
+            }]
+        );
+    }
+
+    /**
+     * Unfollow a user
+     *
+     * @Route("/unfollow/{id}", name="unfollow", methods={"PATCH"})
+     *
+     * @param int $id
+     * @param UserRepository $repository
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
+    public function unfollow(
+        int $id,
+        UserRepository $repository,
+        EntityManagerInterface $em
+    ): JsonResponse
+    {
+        $currentUser = $this->security->getUser();
+        $follow = $repository->find($id);
+        $currentUser->removeFollowing($follow);
+        $user = $repository->findOneBy(array('email' => $currentUser->getUserIdentifier()));
+
+        $em->flush();
+
+        return $this->json($user, 200, [], [AbstractObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($user){
+                return $user->getId();
+            }]
+        );
     }
 
     /**
