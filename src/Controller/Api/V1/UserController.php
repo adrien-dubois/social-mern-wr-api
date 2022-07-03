@@ -81,10 +81,9 @@ class UserController extends AbstractController
 
         $em->flush();
 
-        return $this->json($user, 200, [], [AbstractObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($user){
-                return $user->getId();
-            }]
-        );
+        return $this->json($follow, 200, [], [
+            'groups' => 'user'
+        ]);
     }
 
     /**
@@ -104,15 +103,15 @@ class UserController extends AbstractController
     ): JsonResponse
     {
         $currentUser = $this->security->getUser();
-        $follow = $repository->find($id);
-        $currentUser->removeFollowing($follow);
+        $unfollow = $repository->find($id);
+        $currentUser->removeFollowing($unfollow);
         $user = $repository->findOneBy(array('email' => $currentUser->getUserIdentifier()));
 
         $em->flush();
 
-        return $this->json($user, 200, [], [AbstractObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($user){
-                return $user->getId();
-            }]
+        return $this->json($unfollow, 200, [], [
+            'groups' => 'user'
+            ]
         );
     }
 
