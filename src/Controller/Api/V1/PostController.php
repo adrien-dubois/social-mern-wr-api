@@ -4,6 +4,7 @@ namespace App\Controller\Api\V1;
 
 use App\Entity\Post;
 use App\Repository\PostRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -199,5 +200,65 @@ class PostController extends AbstractController
         return $this->json([
             'message' => 'L\'article a bien été supprimé'
         ], 200);
+    }
+
+    /**
+     * Like a new post
+     *
+     * @Route("/like/{id}", name="like_post", methods={"PATCH"})
+     * @param int $id
+     * @param PostRepository $repository
+     * @param UserRepository $userRepository
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
+    public function like(
+        int $id,
+        PostRepository $repository,
+        UserRepository $userRepository,
+        EntityManagerInterface $em
+    )
+    {
+        $currentUser = $this->security->getUser();
+        $user = $userRepository->findOneBy(array('email'=>$currentUser->getUserIdentifier()));
+        $currentPost = $repository->find($id);
+        $currentPost->addLiker($user);
+
+        $em->flush();
+
+        return $this->json($currentPost, 200, [], [
+            'groups' =>'like'
+        ]);
+    }
+
+    /**
+     *
+     * Unlike a post
+     *
+     * @Route("/unlike/{id}", name="unlike_post", methods={"PATCH"})
+     *
+     * @param int $id
+     * @param PostRepository $repository
+     * @param UserRepository $userRepository
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
+    public function unlike(
+        int $id,
+        PostRepository $repository,
+        UserRepository $userRepository,
+        EntityManagerInterface $em
+    )
+    {
+        $currentUser = $this->security->getUser();
+        $user = $userRepository->findOneBy(array('email'=>$currentUser->getUserIdentifier()));
+        $currentPost = $repository->find($id);
+        $currentPost->removeLiker($user);
+
+        $em->flush();
+
+        return $this->json($currentPost, 200, [], [
+            'groups' =>'like'
+        ]);
     }
 }

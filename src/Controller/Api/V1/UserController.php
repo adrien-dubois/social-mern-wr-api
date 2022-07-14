@@ -61,7 +61,6 @@ class UserController extends AbstractController
         ]);
     }
 
-
     /**
      * Add a follower
      *
