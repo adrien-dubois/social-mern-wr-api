@@ -17,7 +17,7 @@ class Post
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"post", "comment", "user"})
+     * @Groups({"post", "comment", "user", "like"})
      */
     private $id;
 
@@ -60,7 +60,7 @@ class Post
 
     /**
      * @ORM\ManyToMany(targetEntity=User::class, inversedBy="likes")
-     * @Groups({"post"})
+     * @Groups({"post", "like"})
      */
     private $likers;
 
