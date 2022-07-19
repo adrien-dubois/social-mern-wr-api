@@ -169,7 +169,7 @@ class PostController extends AbstractController
 
         $em->flush();
 
-        return $this->json(["message" => "Le post a bien été modifié"], 200, [], [
+        return $this->json($post,200, [], [
             'groups' => 'post'
         ]);
     }

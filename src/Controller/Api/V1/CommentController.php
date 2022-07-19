@@ -140,7 +140,7 @@ class CommentController extends AbstractController
 
         $em->flush();
 
-        return $this->json(["message" => "Le commentaire a bien été modifié"], 200, [], [
+        return $this->json($comment, 200, [], [
             'groups' => 'comment'
         ]);
     }
