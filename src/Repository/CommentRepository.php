@@ -39,6 +39,16 @@ class CommentRepository extends ServiceEntityRepository
         }
     }
 
+    public function findByPost($post)
+    {
+        return $this->createQueryBuilder('c')
+                    ->join('c.post', 'ogpost')
+                    ->where('ogpost.id LIKE :id')
+                    ->setParameter(':id', "%$post%")
+                    ->getQuery()
+                    ->getResult();
+    }
+
 //    /**
 //     * @return Comment[] Returns an array of Comment objects
 //     */

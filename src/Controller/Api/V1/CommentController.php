@@ -66,6 +66,28 @@ class CommentController extends AbstractController
     }
 
     /**
+     *
+     * Get all the comments of a post by its ID
+     *
+     * @Route("/post/{id}", name="get_by_post", methods={"GET"})
+     *
+     * @param int $id
+     * @param CommentRepository $repository
+     * @return JsonResponse
+     */
+    public function getCommentsByPost(
+        int $id,
+        CommentRepository $repository
+    )
+    {
+        $comments = $repository->findByPost($id);
+
+        return $this->json($comments, 200, [], [
+            'groups' => 'comment'
+        ]);
+    }
+
+    /**
      * Endpoint for creating a new comment
      *
      * @Route("/", name="add", methods={"POST"})
