@@ -2,13 +2,20 @@
 
 namespace App\Controller\Api\V1;
 
+use App\Entity\Attachment;
 use App\Entity\Post;
+use App\Form\AttachmentType;
 use App\Repository\PostRepository;
 use App\Repository\UserRepository;
+use App\Service\FileUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Finder\SplFileInfo;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -62,7 +69,7 @@ class PostController extends AbstractController
 
 
         // If the post does not exists, we display 404
-        if(!$post){
+        if (!$post) {
             return $this->json([
                 'error' => 'Le post numéro ' . $id . ' n\'existe pas'
             ], 404
@@ -87,9 +94,9 @@ class PostController extends AbstractController
      * @return JsonResponse
      */
     public function create(
-        Request $request,
-        SerializerInterface $serializer,
-        ValidatorInterface $validator,
+        Request                $request,
+        SerializerInterface    $serializer,
+        ValidatorInterface     $validator,
         EntityManagerInterface $em
     ): JsonResponse
     {
@@ -116,7 +123,7 @@ class PostController extends AbstractController
         $post->setAuthor($user);
 
         $dataPicture = json_decode($request->getContent(), true);
-        if(isset($dataPicture['image']['base64'])){
+        if (isset($dataPicture['image']['base64'])) {
             $imageFile = $dataPicture['image']['base64'];
             $post->setPicture($imageFile);
         }
@@ -141,9 +148,9 @@ class PostController extends AbstractController
      * @return JsonResponse
      */
     public function update(
-        Post $post,
-        Request $request,
-        SerializerInterface $serializer,
+        Post                   $post,
+        Request                $request,
+        SerializerInterface    $serializer,
         EntityManagerInterface $em
     ): JsonResponse
     {
@@ -152,24 +159,24 @@ class PostController extends AbstractController
 
         $jsonData = $request->getContent();
 
-        if(!$post){
+        if (!$post) {
             return $this->json([
-                'errors' => ['message'=>'Ce post n\'existe pas']
+                'errors' => ['message' => 'Ce post n\'existe pas']
             ], 404
             );
         }
 
-        $serializer->deserialize($jsonData, Post::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE=>$post]);
+        $serializer->deserialize($jsonData, Post::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $post]);
 
         $dataPicture = json_decode($request->getContent(), true);
-        if(isset($dataPicture['image']['base64'])){
+        if (isset($dataPicture['image']['base64'])) {
             $imageFile = $dataPicture['image']['base64'];
             $post->setPicture($imageFile);
         }
 
         $em->flush();
 
-        return $this->json($post,200, [], [
+        return $this->json($post, 200, [], [
             'groups' => 'post'
         ]);
     }
@@ -188,7 +195,7 @@ class PostController extends AbstractController
         // This protection will check by the voter if we are allowed to delete this article
         $this->denyAccessUnlessGranted('delete', $post, "Seul l'auteur de ce post peut le supprimer.");
 
-        if(!$post){
+        if (!$post) {
             return $this->json([
                 'error' => 'Ce post n\'existe pas.'
             ], 404);
@@ -213,21 +220,21 @@ class PostController extends AbstractController
      * @return JsonResponse
      */
     public function like(
-        int $id,
-        PostRepository $repository,
-        UserRepository $userRepository,
+        int                    $id,
+        PostRepository         $repository,
+        UserRepository         $userRepository,
         EntityManagerInterface $em
     )
     {
         $currentUser = $this->security->getUser();
-        $user = $userRepository->findOneBy(array('email'=>$currentUser->getUserIdentifier()));
+        $user = $userRepository->findOneBy(array('email' => $currentUser->getUserIdentifier()));
         $currentPost = $repository->find($id);
         $currentPost->addLiker($user);
 
         $em->flush();
 
         return $this->json($currentPost, 200, [], [
-            'groups' =>'like'
+            'groups' => 'like'
         ]);
     }
 
@@ -244,21 +251,82 @@ class PostController extends AbstractController
      * @return JsonResponse
      */
     public function unlike(
-        int $id,
-        PostRepository $repository,
-        UserRepository $userRepository,
+        int                    $id,
+        PostRepository         $repository,
+        UserRepository         $userRepository,
         EntityManagerInterface $em
     )
     {
         $currentUser = $this->security->getUser();
-        $user = $userRepository->findOneBy(array('email'=>$currentUser->getUserIdentifier()));
+        $user = $userRepository->findOneBy(array('email' => $currentUser->getUserIdentifier()));
         $currentPost = $repository->find($id);
         $currentPost->removeLiker($user);
 
         $em->flush();
 
         return $this->json($currentPost, 200, [], [
-            'groups' =>'like'
+            'groups' => 'like'
         ]);
     }
+
+    /**
+     * @return BinaryFileResponse
+     *
+     * @Route("/download", name="dl", methods={"POST"})
+     *
+     */
+    public function download()
+    {
+        $filename = "01 - install_symfo.pdf";
+        $dir = __DIR__ . "/../../../../assets/";
+        $content = $dir . $filename;
+
+        return new BinaryFileResponse($content, 200, [
+            'Content-Type' => 'mime/type',
+//            THINK TO EXPOSE HEADERS WITH CORS
+            'Content-Disposition' => 'attachment;filename='.$filename,
+        ]);
+    }
+
+    /**
+     *
+     * @Route("/dlfile", name="down", methods={"POST"})
+     *
+     * @param Request $request
+     * @param FileUploader $fileUploader
+     * @return JsonResponse
+     */
+    public function dlFile(Request $request, FileUploader $fileUploader, SerializerInterface $serializer)
+    {
+        $filename = "01 - install_symfo.pdf";
+        $dir = __DIR__ . "/../../../../assets/";
+        $contents =  $dir .$filename;
+//        dd($contents);
+        $attachment = new Attachment();
+        $form = $this->createForm(AttachmentType::class, $attachment, ['csrf_protection' => false]);
+        $form->handleRequest($request);
+        $form->submit(['uploads'=>$contents]);
+
+        if($form->isSubmitted() && $form->isValid()){
+
+            dd($form->get('uploads')->getData());
+        }
+
+        $att = $serializer->deserialize($jsonData, Attachment::class, 'json');
+        /** @var UploadedFile $uploaded*/
+        $uploaded = $contents;
+        if($uploaded){
+            $uploadedFilename = $fileUploader->Upload($uploaded);
+            $attachment->setAttachFilename($uploadedFilename);
+        }
+
+
+        return $this->json([
+            "test" => "ok",
+            "filename" => $filename
+        ],
+            200
+        );
+    }
+
 }
