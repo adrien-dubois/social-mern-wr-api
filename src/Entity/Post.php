@@ -17,7 +17,7 @@ class Post
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"post", "comment", "user", "like"})
+     * @Groups({"post", "comment", "user", "like", "current"})
      */
     private $id;
 

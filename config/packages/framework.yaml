@@ -5,8 +5,11 @@ framework:
     http_method_override: false
 
     serializer:
-        default_context:
-            enable_max_depth: true
+        circular_reference_handler: App\Serializer\CircularRefererenceHandler
+        enabled: true
+#        default_context:
+#            circular_limit: 2
+#            enable_max_depth: true
 
     # Enables session support. Note that the session will ONLY be started if you read or write from it.
     # Remove or comment this section to explicitly disable session support.

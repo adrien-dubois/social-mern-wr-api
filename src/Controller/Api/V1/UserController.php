@@ -39,9 +39,7 @@ class UserController extends AbstractController
         $user = $repository->findOneBy(array('email' => $currentUser));
 
         return $this->json($user, 200,[],
-            [AbstractObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($user){
-            return $user->getId();
-    }]
+            ["groups" => "current"]
         );
     }
 

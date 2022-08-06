@@ -15,7 +15,7 @@ class Comment
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"post", "comment", "user"})
+     * @Groups({"post", "comment", "user", "current"})
      */
     private $id;
 
@@ -33,7 +33,7 @@ class Comment
 
     /**
      * @ORM\Column(type="datetime_immutable", nullable=true)
-     * @Groups({"post", "comment"})
+     * @Groups({"comment"})
      */
     private $updatedAt;
 
