@@ -7,8 +7,10 @@ use App\Entity\Post;
 use App\Form\AttachmentType;
 use App\Repository\PostRepository;
 use App\Repository\UserRepository;
+use App\Service\ConvertBase64File;
 use App\Service\FileUploader;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -87,6 +89,7 @@ class PostController extends AbstractController
      *
      * @Route("/", name="add", methods={"POST"})
      *
+     * @IsGranted("ROLE_USER")
      * @param Request $request
      * @param SerializerInterface $serializer
      * @param ValidatorInterface $validator
@@ -97,7 +100,8 @@ class PostController extends AbstractController
         Request                $request,
         SerializerInterface    $serializer,
         ValidatorInterface     $validator,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        FileUploader $fileUploader
     ): JsonResponse
     {
         // we take back the JSON
@@ -118,14 +122,16 @@ class PostController extends AbstractController
         if (count($errors) > 0) {
             return $this->json($errors, 400);
         }
+
         // get the user which is posting an article for the voter, to check if we are the creator of it
         $user = $this->security->getUser();
         $post->setAuthor($user);
 
         $dataPicture = json_decode($request->getContent(), true);
         if (isset($dataPicture['image']['base64'])) {
-            $imageFile = $dataPicture['image']['base64'];
-            $post->setPicture($imageFile);
+            $imageFile = new ConvertBase64File($dataPicture['picture']['base64'], $dataPicture['picture']['name']);
+            $pictureUpload = $fileUploader->upload($imageFile);
+            $post->setPicture($pictureUpload);
         }
 
         $em->persist($post);
@@ -141,6 +147,7 @@ class PostController extends AbstractController
      *
      * @Route("/{id}", name="update", methods={"PUT","PATCH"})
      *
+     * @IsGranted("ROLE_USER")
      * @param Post $post
      * @param Request $request
      * @param SerializerInterface $serializer
@@ -186,6 +193,7 @@ class PostController extends AbstractController
      *
      * @Route("/{id}", name="delete", methods={"DELETE"})
      *
+     * @IsGranted("ROLE_USER")
      * @param Post $post
      * @param EntityManagerInterface $em
      * @return JsonResponse
@@ -212,6 +220,7 @@ class PostController extends AbstractController
     /**
      * Like a new post
      *
+     * @IsGranted("ROLE_USER")
      * @Route("/like/{id}", name="like_post", methods={"PATCH"})
      * @param int $id
      * @param PostRepository $repository
@@ -244,6 +253,7 @@ class PostController extends AbstractController
      *
      * @Route("/unlike/{id}", name="unlike_post", methods={"PATCH"})
      *
+     * @IsGranted("ROLE_USER")
      * @param int $id
      * @param PostRepository $repository
      * @param UserRepository $userRepository

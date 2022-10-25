@@ -5,6 +5,7 @@ namespace App\Controller\Api\V1;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -62,6 +63,7 @@ class UserController extends AbstractController
     /**
      * Add a follower
      *
+     * @IsGranted("ROLE_USER")
      * @Route("/follow/{id}", name="follow_id", methods={"PATCH"})
      *
      * @param int $id
@@ -88,6 +90,7 @@ class UserController extends AbstractController
      *
      * @Route("/unfollow/{id}", name="unfollow", methods={"PATCH"})
      *
+     * @IsGranted("ROLE_USER")
      * @param int $id
      * @param UserRepository $repository
      * @param EntityManagerInterface $em
@@ -117,6 +120,7 @@ class UserController extends AbstractController
      *
      * @Route("/follow/", name="follow", methods={"GET"})
      *
+     * @IsGranted("ROLE_USER")
      * @param UserRepository $repository
      * @return JsonResponse
      */
@@ -136,6 +140,7 @@ class UserController extends AbstractController
      *
      * @Route("/picture", name="picture", methods={"PATCH"})
      *
+     * @IsGranted("ROLE_USER")
      * @param UserRepository $repository
      * @param EntityManagerInterface $em
      * @param Request $request
@@ -162,6 +167,7 @@ class UserController extends AbstractController
      *
      * @Route("/del-picture", name="del-picture", methods={"POST"})
      *
+     * @IsGranted("ROLE_USER")
      * @param UserRepository $repository
      * @param EntityManagerInterface $em
      * @return JsonResponse
@@ -181,6 +187,7 @@ class UserController extends AbstractController
      *
      * @Route("/update-bio", name="update_user", methods={"PUT", "PATCH"})
      *
+     * @IsGranted("ROLE_USER")
      * @param UserRepository $repository
      * @param EntityManagerInterface $em
      * @param Request $request
